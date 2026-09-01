@@ -500,17 +500,20 @@ export function App() {
       />
 
       {/* Game Over Modal */}
-      <GameOverModal
-        winner={winner}
-        mode={mode}
-        p1Name={p1Name}
-        p2Name={p2Name}
-        p1Score={p1Score}
-        p2Score={p2Score}
-        myPlayerId={myPlayerId}
-        onRematch={handleRematch}
-        onGoHome={handleGoHome}
-      />
+      {isGameOverModalOpen && (
+        <GameOverModal
+          winner={winner}
+          mode={mode}
+          p1Name={p1Name}
+          p2Name={p2Name}
+          p1Score={p1Score}
+          p2Score={p2Score}
+          myPlayerId={myPlayerId}
+          onRematch={handleRematch}
+          onGoHome={handleGoHome}
+          onClose={() => setIsGameOverModalOpen(false)}
+        />
+      )}
 
       {/* How to Play Rules Modal */}
       <HowToPlayModal isOpen={isHowToPlayOpen} onClose={() => setIsHowToPlayOpen(false)} />
