@@ -43,9 +43,23 @@ class PeerService {
 
       this.peer = new Peer(peerId, {
         debug: 1,
+        config: {
+          iceServers: [
+            { urls: 'stun:stun.l.google.com:19302' },
+            { urls: 'stun:global.stun.twilio.com:3478' }
+          ]
+        }
       });
 
+      const timeout = setTimeout(() => {
+        if (this.peer && !this.peer.open) {
+          this.notifyStatus('error', 'Connection to server timed out. Vercel/PeerJS might be blocked or busy.');
+          reject(new Error('Signaling server timeout'));
+        }
+      }, 10000);
+
       this.peer.on('open', (id) => {
+        clearTimeout(timeout);
         console.log('Room host peer opened:', id);
         this.notifyStatus('connecting', 'Waiting for Player 2 to join...');
         resolve(this.roomCode);
@@ -58,8 +72,9 @@ class PeerService {
       });
 
       this.peer.on('error', (err) => {
+        clearTimeout(timeout);
         console.error('Peer creation error:', err);
-        this.notifyStatus('error', err.type === 'unavailable-id' ? 'Room code already in use. Please try another code.' : err.message);
+        this.notifyStatus('error', err.type === 'unavailable-id' ? 'Room code already in use. Please try another code.' : 'PeerJS Server Error: ' + err.message);
         reject(err);
       });
     });
@@ -78,9 +93,23 @@ class PeerService {
 
       this.peer = new Peer({
         debug: 1,
+        config: {
+          iceServers: [
+            { urls: 'stun:stun.l.google.com:19302' },
+            { urls: 'stun:global.stun.twilio.com:3478' }
+          ]
+        }
       });
 
+      const timeout = setTimeout(() => {
+        if (this.peer && !this.peer.open) {
+          this.notifyStatus('error', 'Connection to server timed out. Vercel/PeerJS might be blocked.');
+          reject(new Error('Signaling server timeout'));
+        }
+      }, 10000);
+
       this.peer.on('open', () => {
+        clearTimeout(timeout);
         const targetPeerId = this.getFullPeerId(this.roomCode);
         this.notifyStatus('connecting', `Joining room ${this.roomCode}...`);
 
@@ -94,14 +123,21 @@ class PeerService {
           return;
         }
 
+        const connTimeout = setTimeout(() => {
+          this.notifyStatus('error', 'Host not responding or room code invalid.');
+          reject(new Error('Connection host timeout'));
+        }, 10000);
+
         this.setupConnectionHandlers();
 
         this.conn.on('open', () => {
+          clearTimeout(connTimeout);
           this.notifyStatus('connected', 'Connected to room host!');
           resolve();
         });
 
         this.conn.on('error', (err) => {
+          clearTimeout(connTimeout);
           console.error('Connection error:', err);
           this.notifyStatus('error', 'Failed to connect to room.');
           reject(err);
@@ -109,6 +145,7 @@ class PeerService {
       });
 
       this.peer.on('error', (err) => {
+        clearTimeout(timeout);
         console.error('Guest peer error:', err);
         this.notifyStatus('error', 'Peer connection failed. Check room code.');
         reject(err);
