@@ -42,6 +42,7 @@ export function App() {
   const [isHost, setIsHost] = useState<boolean>(true);
   const [disconnectAlert, setDisconnectAlert] = useState<string | null>(null);
   const [powerUpMode, setPowerUpMode] = useState<boolean>(false);
+  const [isGameOverModalOpen, setIsGameOverModalOpen] = useState<boolean>(false);
 
   const [activeReaction, setActiveReaction] = useState<{ emoji: string, player: PlayerId, id: number } | null>(null);
 
@@ -106,6 +107,7 @@ export function App() {
         setP2State(newP2);
         setTurn('player1');
         setWinner(null);
+        setIsGameOverModalOpen(false);
 
         peerService.send({
           type: 'STATE_SYNC',
@@ -255,7 +257,10 @@ export function App() {
         if (sP1) setP1State(sP1);
         if (sP2) setP2State(sP2);
         if (sTurn) setTurn(sTurn);
-        if (sWinner !== undefined) setWinner(sWinner);
+        if (sWinner !== undefined) {
+          setWinner(sWinner);
+          if (sWinner !== null) setIsGameOverModalOpen(true);
+        }
         if (sName1) setP1Name(sName1);
         if (sName2) setP2Name(sName2);
         if (sS1 !== undefined) setP1Score(sS1);
@@ -329,6 +334,7 @@ export function App() {
     setP1State(newP1);
     setP2State(newP2);
     setWinner(null);
+    setIsGameOverModalOpen(false);
 
     const nextStartingTurn: PlayerId = st.turn === 'player1' ? 'player2' : 'player1';
     setTurn(st.mode === 'vs-computer' ? 'player1' : nextStartingTurn);

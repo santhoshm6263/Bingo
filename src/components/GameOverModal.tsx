@@ -12,6 +12,7 @@ interface GameOverModalProps {
   myPlayerId: PlayerId;
   onRematch: () => void;
   onGoHome: () => void;
+  onClose: () => void;
 }
 
 export const GameOverModal: React.FC<GameOverModalProps> = ({
@@ -24,6 +25,7 @@ export const GameOverModal: React.FC<GameOverModalProps> = ({
   myPlayerId,
   onRematch,
   onGoHome,
+  onClose,
 }) => {
   if (!winner) return null;
 
@@ -132,9 +134,15 @@ export const GameOverModal: React.FC<GameOverModalProps> = ({
           <button className="btn btn-primary" style={{ width: '100%', padding: '14px' }} onClick={onRematch}>
             <RotateCcw size={18} /> Play Again / Rematch
           </button>
-          <button className="btn btn-ghost" style={{ width: '100%', padding: '12px' }} onClick={onGoHome}>
-            <Home size={18} /> Main Menu
-          </button>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+            <button className="btn btn-ghost" style={{ width: '100%', padding: '12px' }} onClick={onClose}>
+              View Final Board
+            </button>
+            <button className="btn btn-ghost" style={{ width: '100%', padding: '12px' }} onClick={onGoHome}>
+              <Home size={18} /> Main Menu
+            </button>
+          </div>
         </div>
       </div>
     </div>
